@@ -22,7 +22,7 @@ def big_prime(num_digits, time_limit):
 
 def find_prime_parallel():
     with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(big_prime, 1000, 300) for _ in range(8)]
+        futures = [executor.submit(big_prime, 10000, 300) for _ in range(8)]
         
         for future in futures:
             try:
