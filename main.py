@@ -2,6 +2,8 @@ import gmpy2
 import random
 import time
 import sys
+from concurrent.futures import ProcessPoolExecutor
+
 sys.set_int_max_str_digits(12000)
 
 def big_prime(num_digits, time_limit):
@@ -15,15 +17,27 @@ def big_prime(num_digits, time_limit):
             n += 1
 
         if gmpy2.is_prime(n, 40): 
-            print(f"{time.time() - start_time:.2f}")
-            return n
+            return n, time.time() - start_time
+    return "fail", "fail"
 
+def find_prime_parallel():
+    with ProcessPoolExecutor(max_workers=4) as executor:
+        futures = [executor.submit(big_prime, 1000, 300) for _ in range(8)]
+        
+        for future in futures:
+            try:
+                prime, time1 = future.result(timeout=305)
+                if prime != "fail":
+                    print(time1)
+                    print(prime)
+                    print(len(str(prime)))
+                    for f in futures:
+                        f.cancel()
+                    return prime, time1
+            except Exception as e:
+                continue
     
-    raise TimeoutError("Time out")
+    return "fail", "fail"
 
-try:
-    prime = big_prime(5000, 30000)
-    print(prime)
-    print(len(str(prime)))
-except Exception as e:
-    print(f"Error: {e}")
+if __name__ == "__main__":
+    prime, time1 = find_prime_parallel()
